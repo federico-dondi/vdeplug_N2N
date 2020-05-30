@@ -1,2 +1,2 @@
 # vdeplug_N2N
-N2N plugin module for VDEPlug4.
+Peer-to-Peer VPN plugin module for [VDEPlug4](https://github.com/rd235/vdeplug4). Based on the [N2N](https://github.com/ntop/n2n) library.
