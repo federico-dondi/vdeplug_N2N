@@ -1,5 +1,6 @@
-#Build folders etc.
+# Build folders etc.
 build/
+
 # Prerequisites
 *.d
 
