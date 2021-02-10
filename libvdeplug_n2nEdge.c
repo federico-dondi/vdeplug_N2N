@@ -48,69 +48,6 @@ struct vde_n2n_conn {
 static int keep_running;
 static int rc;
 
-/*
- * UTILITY FUNCTIONS
- */
-// TODO da completare
-//static int parse_conf(struct vdeparms *parms) {
-//
-//	FILE *fp;
-//	char *line = NULL;
-//	size_t len = 0;
-//	ssize_t read;
-//
-//	fp = fopen(N2N_CONFIG_FILE, "r");
-//	if (fp == NULL)
-//		exit(EXIT_FAILURE);
-//
-//	printf("### parse_conf(): Begin Loop\n");
-//
-//	while ((read = getline(&line, &len, fp)) != -1) {
-//
-//		//printf("line: %s\n", line);
-//		if (strlen(line) < 2 || line[0] == '#')
-//			continue;
-//
-//		char *token_tag = strtok(line, "=");
-//		char *token_value;
-//		if (token_tag) {
-//			// TAG
-//			//printf("tag: %s\n", token_tag);
-//			// VALUE
-//			token_value = strtok(NULL, " ");
-////			printf("value: %s\n", token_value);
-//
-//			struct vdeparms *scan;
-//			for (scan = parms; scan->tag; scan++) {
-//				if (strncmp(token_tag, scan->tag, sizeof(token_tag)) == 0) {
-//					//*(scan->value) = (char*)token_value;
-//					printf("%s\n", token_value);
-//					scan->value = &token_value;
-//					printf(*(scan->value));
-//					//*(scan->value) = "prova\n";
-//					break;
-//				}
-//
-//			}
-//			if (scan->tag == NULL) {
-//				fprintf(stderr, "unknown key\n");
-//				return -1;
-//			}
-//
-//		}
-//	}
-//
-//	printf("### parse_conf(): End Loop\n");
-//
-//	fclose(fp);
-//
-//	if (line)
-//		free(line);
-//	return 0;
-//
-//}
-// ##########################################################
-
 static VDECONN *vde_n2nEdge_open(char *sockname,char *descr,int interface_version,
 		struct vde_open_args *open_args) {
 
@@ -230,13 +167,13 @@ static VDECONN *vde_n2nEdge_open(char *sockname,char *descr,int interface_versio
 
 static ssize_t vde_n2nEdge_recv(VDECONN *conn,void *buf,size_t len,int flags) {
 	struct vde_n2n_conn *vde_con = (struct vde_n2n_conn *)conn;
-	edge_read_from_tap(vde_con->eee);
+	//edge_read_from_tap(vde_con->eee);
 	return NULL;
 }
 
 static ssize_t vde_n2nEdge_send(VDECONN *conn,const void *buf,size_t len,int flags) {
 	struct vde_n2n_conn *vde_con = (struct vde_n2n_conn *)conn;
-	edge_send_packet2net(vde_con->eee, (uint8_t *)buf, len);
+	//edge_send_packet2net(vde_con->eee, (uint8_t *)buf, len);
 	return NULL;
 }
 
