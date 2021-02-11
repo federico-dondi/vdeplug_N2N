@@ -7,13 +7,15 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
+#include "utils.h"
+
 
 #define NTOP_BUFSIZE 128
 #define VDEPLUG_EDGE_MAX_PARAMS 8
 #define N2N_EDGE_CONFIG_FILE "/etc/n2n/edge.conf"
 
 // Utility
-int parseConf(const char *path, struct vdeparms *parms, const int MAX_PARMS);
+//int parseConf(const char *path, struct vdeparms *parms, const int MAX_PARMS);
 // VDE functions
 static VDECONN *vde_n2nEdge_open(char *sockname, char *descr,int interface_version,
 		struct vde_open_args *open_args);
@@ -44,40 +46,6 @@ struct vde_n2n_conn {
 };
 
 // Keep running.
-
-
-int parseConf(const char *path, struct vdeparms *parms, const int MAX_PARMS) {
-	FILE * fp;
-	char * line = NULL;
-	char * found;
-	size_t len = 0;
-
-	fp = fopen(path, "r");
-	if (fp == NULL) {
-		printf("no file found!\n");
-		return -1;
-	}
-	for (int i=0; i < MAX_PARMS; i++) {
-		getline(&line, &len, fp);
-		found = strsep(&line,"=");
-		printf("key: %s\t", found);
-
-		found = strsep(&line,"=");
-
-		printf("value: %s", found);
-		if (strlen(found) > 1) {
-			found[strcspn(found, "\n")] = 0;
-			if (*parms[i].value == NULL)
-				*parms[i].value = found;
-		}
-	}
-
-	fclose(fp);
-	if (line)
-		free(line);
-
-	return 0;
-}
 
 static int keep_running;
 static int rc;
@@ -131,10 +99,10 @@ static VDECONN *vde_n2nEdge_open(char *sockname,char *descr,int interface_versio
 			parseConf(N2N_EDGE_CONFIG_FILE, &parms, VDEPLUG_EDGE_MAX_PARAMS);
 		}
 
-		for (int i=0; i < 10; i++) {
-			if (*parms[i].value != NULL)
-				printf("%s: %s\n", parms[i].tag, *parms[i].value);
-		}
+//		for (int i=0; i < 10; i++) {
+//			if (*parms[i].value != NULL)
+//				printf("%s: %s\n", parms[i].tag, *parms[i].value);
+//		}
 
 		char snode[256];
 		snprintf(snode, sizeof snode, "%s:%s", snodeaddr, snodeport);

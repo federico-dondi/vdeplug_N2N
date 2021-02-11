@@ -7,11 +7,11 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
+#include "utils.h"
 
 #define NTOP_BUFSIZE 128
-#define N2N_CONFIG_FILE "/etc/n2n/super.conf"
-#define VDEPLUG_SUPER_MAX_PARAMS 3
-
+#define N2N_SUPER_CONFIG_FILE "/etc/n2n/supernode.conf"
+#define VDEPLUG_SUPER_MAX_PARAMS 1
 
 // VDE functions
 
@@ -52,13 +52,11 @@ static VDECONN *vde_n2n_super_open(char *sockname,char *descr,int interface_vers
 
     char
 			*lport = "1234", 	// Default is 1234
-			*daemon = "false",	// Default is false
 			*cfgfile = NULL;
 
     struct addrinfo hints;
 	struct vdeparms parms[] = {
 			{"lport", &lport},
-			{"daemon", &daemon},
 			{"cfgfile", &cfgfile},
 			{NULL, NULL}};
 
@@ -68,17 +66,17 @@ static VDECONN *vde_n2n_super_open(char *sockname,char *descr,int interface_vers
 	if (vde_parseparms(sockname, parms) != 0)
 		return NULL;
 
-//	if (cfgfile != NULL) {
-//		//parseConf(N2N_CONFIG_FILE, &parms, VDEPLUG_SUPER_MAX_PARAMS);
-//	}
-
-	for (int i=0; i < 3; i++) {
-		if (*parms[i].value != NULL)
-			printf("%s: %s\n", parms[i].tag, *parms[i].value);
+	if (*cfgfile != NULL && strcmp(cfgfile, "yes") == 0) {
+		parseConf(N2N_SUPER_CONFIG_FILE, &parms, VDEPLUG_SUPER_MAX_PARAMS);
 	}
 
+//	for (int i=0; i < 2; i++) {
+//		if (*parms[i].value != NULL)
+//			printf("%s: %s\n", parms[i].tag, *parms[i].value);
+//	}
+
     sn_init(&sss_node);
-	sss_node.daemon = 0;   // Whether to daemonize
+	sss_node.daemon = 0;   // Whether to daemonize, always false
 	sss_node.lport = 1234; // Main UDP listen port
 
 	sss_node.sock = open_socket(sss_node.lport, 1);
@@ -110,7 +108,6 @@ static VDECONN *vde_n2n_super_open(char *sockname,char *descr,int interface_vers
 	else {
 		return (VDECONN *)newconn;
 	}
-
 
 }
 
