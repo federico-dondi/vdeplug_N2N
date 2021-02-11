@@ -10,6 +10,8 @@
 
 #define NTOP_BUFSIZE 128
 #define N2N_CONFIG_FILE "/etc/n2n/super.conf"
+#define VDEPLUG_SUPER_MAX_PARAMS 3
+
 
 // VDE functions
 
@@ -36,7 +38,6 @@ struct vde_n2n_super_conn {
 	struct vdeplug_module *module;
 	void *data;
 	n2n_sn_t *sss_node;
-	n2n_sock_t *sock;
 };
 
 static int keep_running;
@@ -45,42 +46,68 @@ static int rc;
 static VDECONN *vde_n2n_super_open(char *sockname,char *descr,int interface_version,
 		struct vde_open_args *open_args) {
 
-	printf("vde_n2n_super_open\n");
-    struct vde_n2n_super_conn *newconn = NULL;
     n2n_sn_t sss_node;
+
+    struct vde_n2n_super_conn *newconn = NULL;
+
+    char
+			*lport = "1234", 	// Default is 1234
+			*daemon = "false",	// Default is false
+			*cfgfile = NULL;
+
+    struct addrinfo hints;
+	struct vdeparms parms[] = {
+			{"lport", &lport},
+			{"daemon", &daemon},
+			{"cfgfile", &cfgfile},
+			{NULL, NULL}};
+
+	// Utility per parsare i parametri
+	memset(&hints, 0, sizeof(struct addrinfo));
+
+	if (vde_parseparms(sockname, parms) != 0)
+		return NULL;
+
+//	if (cfgfile != NULL) {
+//		//parseConf(N2N_CONFIG_FILE, &parms, VDEPLUG_SUPER_MAX_PARAMS);
+//	}
+
+	for (int i=0; i < 3; i++) {
+		if (*parms[i].value != NULL)
+			printf("%s: %s\n", parms[i].tag, *parms[i].value);
+	}
 
     sn_init(&sss_node);
 	sss_node.daemon = 0;   // Whether to daemonize
 	sss_node.lport = 1234; // Main UDP listen port
 
 	sss_node.sock = open_socket(sss_node.lport, 1);
-	if (-1 == sss_node.sock)
-	{
+
+
+	if (-1 == sss_node.sock) {
 		exit(-2);
 	}
+    traceEvent(TRACE_NORMAL, "supernode is listening on UDP %u (main)", sss_node.lport);
 
 	sss_node.mgmt_sock = open_socket(5645, 0); // Main UDP management port
 	if (-1 == sss_node.mgmt_sock)
 	{
 		exit(-2);
 	}
+    traceEvent(TRACE_NORMAL, "supernode is listening on UDP %u (management)", sss_node.mport);
+
 
 	keep_running = 1;
 
 	newconn = calloc(1, sizeof(*newconn));
 	newconn->sss_node = &sss_node;
-	newconn->data = sss_node.sock;
 
 	// Run supernode loop
-//	    print_n2n_version();
 	if (fork() == 0) {
-		printf("vde_n2n_super_open, child entering loop\n");
 		rc = run_sn_loop(&sss_node, &keep_running);
-		printf("vde_n2n_super_open, child exiting loop\n");
 		return NULL;
 	}
 	else {
-		printf("vde_n2n_super_open, father returning\n");
 		return (VDECONN *)newconn;
 	}
 
@@ -88,34 +115,24 @@ static VDECONN *vde_n2n_super_open(char *sockname,char *descr,int interface_vers
 }
 
 static ssize_t vde_n2n_super_recv(VDECONN *conn,void *buf,size_t len,int flags) {
-	printf("vde_n2n_super_recv\n");
-
-	return NULL;
+	return (ssize_t)NULL;
 }
 
 static ssize_t vde_n2n_super_send(VDECONN *conn,const void *buf,size_t len,int flags) {
-	printf("vde_n2n_super_send\n");
-
-	return NULL;
+	return (ssize_t)NULL;
 }
 
 static int vde_n2n_super_datafd(VDECONN *conn) {
-
-	printf("vde_n2n_super_datafd\n");
-	struct vde_n2n_super_conn *vde_con = (struct vde_n2n_super_conn *)conn;
-	return vde_con->data;
+	return 0;
 }
 
 static int vde_n2n_super_ctlfd(VDECONN *conn) {
-	printf("vde_n2n_super_ctlfd\n");
 	return -1;
 }
 
 static int vde_n2n_super_close(VDECONN *conn) {
 
 	struct vde_n2n_super_conn *vde_con = (struct vde_n2n_super_conn *)conn;
-
-	printf("vde_n2n_super_close\n");
 	sn_term(vde_con->sss_node);
 	return rc;
 }
