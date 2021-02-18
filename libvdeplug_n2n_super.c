@@ -46,21 +46,21 @@ static int rc;
 static VDECONN *vde_n2n_super_open(char *sockname,char *descr,int interface_version,
 		struct vde_open_args *open_args) {
 
-    n2n_sn_t sss_node;
+	n2n_sn_t sss_node;
 
-    struct vde_n2n_super_conn *newconn = NULL;
+	struct vde_n2n_super_conn *newconn = NULL;
 
-    char
-			*lport = "1234", 	// Default is 1234
-			*cfgfile = NULL;
+	char
+		*lport = "1234", 	// Default is 1234
+		*cfgfile = NULL;
 
-    struct addrinfo hints;
+	struct addrinfo hints;
 	struct vdeparms parms[] = {
 			{"lport", &lport},
 			{"cfgfile", &cfgfile},
 			{NULL, NULL}};
 
-	// Utility per parsare i parametri
+
 	memset(&hints, 0, sizeof(struct addrinfo));
 
 	if (vde_parseparms(sockname, parms) != 0)
@@ -69,13 +69,13 @@ static VDECONN *vde_n2n_super_open(char *sockname,char *descr,int interface_vers
 	if (*cfgfile != NULL && strcmp(cfgfile, "yes") == 0) {
 		parseConf(N2N_SUPER_CONFIG_FILE, &parms, VDEPLUG_SUPER_MAX_PARAMS);
 	}
-
+// Useful for debugging
 //	for (int i=0; i < 2; i++) {
 //		if (*parms[i].value != NULL)
 //			printf("%s: %s\n", parms[i].tag, *parms[i].value);
 //	}
 
-    sn_init(&sss_node);
+	sn_init(&sss_node);
 	sss_node.daemon = 0;   // Whether to daemonize, always false
 	sss_node.lport = 1234; // Main UDP listen port
 
@@ -85,22 +85,24 @@ static VDECONN *vde_n2n_super_open(char *sockname,char *descr,int interface_vers
 	if (-1 == sss_node.sock) {
 		exit(-2);
 	}
-    traceEvent(TRACE_NORMAL, "supernode is listening on UDP %u (main)", sss_node.lport);
+	// Function defined in n2n, informative logging
+	traceEvent(TRACE_NORMAL, "supernode is listening on UDP %u (main)", sss_node.lport);
 
 	sss_node.mgmt_sock = open_socket(5645, 0); // Main UDP management port
-	if (-1 == sss_node.mgmt_sock)
-	{
+	
+	if (-1 == sss_node.mgmt_sock) {
 		exit(-2);
 	}
-    traceEvent(TRACE_NORMAL, "supernode is listening on UDP %u (management)", sss_node.mport);
+	// Function defined in n2n, informative logging
+	traceEvent(TRACE_NORMAL, "supernode is listening on UDP %u (management)", sss_node.mport);
 
 
 	keep_running = 1;
-
+	// Allocating vdeconn struct
 	newconn = calloc(1, sizeof(*newconn));
 	newconn->sss_node = &sss_node;
 
-	// Run supernode loop
+	// Run supernode loop, tricky sol.
 	if (fork() == 0) {
 		rc = run_sn_loop(&sss_node, &keep_running);
 		return NULL;
