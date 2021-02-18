@@ -28,16 +28,18 @@ endforeach(THISLIB)
 add_definitions(-D_GNU_SOURCE)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
-add_library(vdeplug_n2nEdge SHARED libvdeplug_n2nEdge.c)
+add_library(utils utils.h utils.c)
+
+add_library(vdeplug_n2n_edge SHARED libvdeplug_n2n_edge.c)
 add_library(vdeplug_n2n_super SHARED libvdeplug_n2n_super.c)
 
-target_link_libraries(vdeplug_n2nEdge n2n vdeplug_mod)
-target_link_libraries(vdeplug_n2n_super n2n vdeplug_mod)
+target_link_libraries(vdeplug_n2n_edge n2n vdeplug_mod utils)
+target_link_libraries(vdeplug_n2n_super n2n vdeplug_mod utils)
 
 set_property(TARGET n2n PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 
-install(TARGETS vdeplug_n2nEdge vdeplug_n2n_super DESTINATION ${CMAKE_INSTALL_LIBDIR}/vdeplug)
+install(TARGETS vdeplug_n2n_edge vdeplug_n2n_super DESTINATION ${CMAKE_INSTALL_LIBDIR}/vdeplug)
 
 add_custom_target(configure
 	COMMAND /bin/sh "./autogen.sh"

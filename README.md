@@ -10,10 +10,10 @@ Peer-to-Peer VPN plugin module for [VDEPlug](https://github.com/rd235/vdeplug4).
 6. `make configure `
 7. `sudo make install`
 
-## Usage:
+## Edge Usage:
 
 Run:
-`sudo vde_plug n2nEdge://`
+`sudo vde_plug n2n_edge://`
 
 ### NB: root privileges are needed for the creation of the tap interface.
 
@@ -27,7 +27,36 @@ parameters: (see [vde_url arguments parsing](https://github.com/rd235/vdeplug4/b
 - snodeport=1234
 - snodeaddr=localhost
 
+## Supernode Usage:
 
-## Configuration
+Run:
+`vde_plug n2n_super://`
 
-Reading configuration from file will be available soon.
+parameters:
+- lport=1234
+
+## Using configuration files
+
+Both edge and super can read parameters from configuration files, to be placed respectively in
+- /etc/n2n/edge.conf
+- /etc/n2n/supernode.conf
+
+In this repository you can find default configuration files.
+
+## Connect the dots
+
+Once a supernode has been started, two edge dots can reach each other, for example:
+
+1st node:
+`sudo vde_plug n2n_edge://first/cfgfile=yes/ipaddr=10.0.0.1/secret=unibo/community=vde`
+
+2nd node:
+`sudo vde_plug n2n_edge://second/cfgfile=yes/ipaddr=10.0.0.2/secret=unibo/community=vde`
+
+Once set up, the machine running the first node can contact the machine running the second node, via the tap interfaces that
+have been created.
+
+1st node:
+`ping -I edge0 10.0.0.2`
+
+
